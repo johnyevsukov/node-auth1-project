@@ -1,6 +1,10 @@
 const express = require("express");
 const helmet = require("helmet");
 const cors = require("cors");
+const session = require('express-session')
+
+const authRouter = require('./auth/auth-router');
+const usersRouter = require('./users/users-router.js');
 
 /**
   Do what needs to be done to support sessions with the `express-session` package!
@@ -20,6 +24,20 @@ const server = express();
 server.use(helmet());
 server.use(express.json());
 server.use(cors());
+server.use(session({
+  name: 'chocolatechip',
+  secret: 'keep it secret', // .env file
+  cookie: {
+    maxAge: 1000 * 60 * 60,
+    secure: false, // if true, only works over TLS/https
+    httpOnly: false, // if true, cookie not in document
+  },
+  resave: false, // required by some session stores
+  saveUninitialized: false, // session not saved automatically
+}))
+
+server.use('/api/users', usersRouter);
+server.use('/api/auth', authRouter);
 
 server.get("/", (req, res) => {
   res.json({ api: "up" });
